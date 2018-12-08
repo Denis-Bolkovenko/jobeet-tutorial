@@ -304,7 +304,7 @@ That’s all for today, you can find the code here: [https://github.com/gregurco
 
 ## Next Steps
 
-Continue this tutorial here: Jobeet Day 14: Translations
+Continue this tutorial here: [Jobeet Day 14: Translations](day-14.md)
 
 Previous post is available here: [Jobeet Day 12: The API](day-12.md)
 
