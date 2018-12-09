@@ -11,7 +11,7 @@ From [Wikipedia][3]:
 
 ## Configuration
 
-Symfony comes with [translations][4] package out of the box. We don't have to install it.  
+Symfony comes with [translations][4] package out of the box. We don’t have to install it.  
 Also we have initial configuration in `config/packages/translation.yaml` file:
 
 ```yaml
@@ -58,13 +58,222 @@ fos_user:
 
 When the `prefix` with locale variable is used in a route, Symfony will automatically use its value.  
 If you want to test that, then just add somewhere in `templates/base.html.twig` next code `{{ dump(app.request.locale) }}` and open homepage.
-You will see `en` value, because it's configured as default locale.
+You will see `en` value, because it’s configured as default locale.
 Then open URL [http://127.0.0.1/ru/][5] and `ru` will be displayed.
 That means symfony understands the locale from URL.
 
+Also it’s possible to check current locale through Profiler:
+click on Profiler Bar in the bottom of the page, find `Request / Response` tab in the left menu and in section `Request Attributes` you can see `_locale` parameter.
+
 ## Language Switching
 
-...
+For the user to change the language, a [dropdown][6] must be added in the layout.
+
+First of all define the list of languages supported by the system.
+Add it in `config/services.yaml` file:
+
+```diff
+  parameters:
+      locale: 'en'
++     locales: ['en', 'ru']
+      max_jobs_on_homepage: 10
+      # ...
+```
+
+And define as global twig variable in `config/packages/twig.yaml`:
+
+```diff
+  twig:
+      paths: ['%kernel.project_dir%/templates']
+      debug: '%kernel.debug%'
+      strict_variables: '%kernel.debug%'
+      globals:
+          max_jobs_on_homepage: '%max_jobs_on_homepage%'
+          jobs_web_directory: '%jobs_web_directory%'
++         locales: '%locales%'
+      form_themes:
+          - 'bootstrap_3_horizontal_layout.html.twig'
+```
+
+Later we will use this variable to render selector.
+
+Till now we connected only css file from bootstrap library using CDN, but now we need JS file too which requires [jQuery][8].
+Let’s see how to connect css/js libraries in Symfony way!
+
+Add [NodeJS][7] container in `docker-compose.yml` file:
+
+```yaml
+version: "3.1"
+services:
+    # ...
+
+    node:
+        image: node:9.11.1
+        container_name: jobeet-node
+        working_dir: /application
+        volumes:
+        - .:/application
+```
+
+This container has **node** and **npm** inside. NPM is a package manager for JavaScript (like Composer for PHP).
+
+Build and run node container:
+
+```bash
+docker-compose up -d
+```
+
+Enter in node container:
+
+```bash
+docker-compose run node bash
+```
+
+Install packages from package.json file:
+
+```bash
+npm install
+```
+
+Install jQuery and Bootstrap:
+
+```bash
+npm install --save-dev jquery@^3.3.1
+npm install --save-dev bootstrap@^3.3.7
+```
+
+Create main js file (`assets/js/app.js`), which will be included on all pages.
+Trigger `dropdown` from bootstrap library on all elements with `dropdown-toggle` class:
+
+```js
+// require jQuery normally
+var $ = require('jquery');
+
+// create global $ and jQuery variables
+global.$ = global.jQuery = $;
+
+require('bootstrap');
+
+$(document).ready(function() {
+  $(".dropdown-toggle").dropdown();
+});
+```
+
+`webpack.config.js`
+
+```diff
+  var Encore = require('@symfony/webpack-encore');
+  
+  Encore
+      // the project directory where compiled assets will be stored
+      .setOutputPath('public/build/')
+      // the public path used by the web server to access the previous directory
+      .setPublicPath('/build')
+      .cleanupOutputBeforeBuild()
+      .enableSourceMaps(!Encore.isProduction())
+      // uncomment to create hashed filenames (e.g. app.abc123.css)
+      // .enableVersioning(Encore.isProduction())
+  
+      // uncomment to define the assets of the project
+-     // .addEntry('js/app', './assets/js/app.js')
++     .addEntry('js/app', './assets/js/app.js')
+      // .addStyleEntry('css/app', './assets/css/app.scss')
+  
+      // uncomment if you use Sass/SCSS files
+      // .enableSassLoader()
+  
+      // uncomment for legacy applications that require $/jQuery as a global variable
+-     // .autoProvidejQuery()
++     .autoProvidejQuery()
++     .autoProvideVariables({
++         $: 'jquery',
++         jQuery: 'jquery',
++         'window.jQuery': 'jquery'
++     })
+  ;
+  
+  module.exports = Encore.getWebpackConfig();
+```
+
+Build assets with next command in node container:
+
+```bash
+npm run dev
+```
+
+You can notice that new `app.js` file appeared in folder `public/build/js`.
+This file is build using webpack and contains all JavaScript code required for out application.
+Include this file in base layout (`templates/base.html.twig`) and add dropdown to select the language:
+
+```diff
+  <!DOCTYPE html>
+  <html>
+  <head>
+      <title>{% block title %}{{ 'job.base.title'|trans }}{% endblock %}</title>
+  
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  
+      {% block stylesheets %}{% endblock %}
+  
++     <script src="{{ asset('build/js/app.js') }}"></script>
+      {% block javascripts %}{% endblock %}
+  
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  </head>
+  <body>
+  <nav class="navbar navbar-default">
+      <div class="container-fluid">
+          <div class="navbar-header">
+              <a class="navbar-brand" href="{{ path('job.list') }}">{{ 'job.base.list'|trans }}</a>
+          </div>
+  
+          <div class="collapse navbar-collapse">
+              <ul class="nav navbar-nav navbar-right">
+                  {% if is_granted('ROLE_ADMIN') %}
+                      <li>
+                          <div>
+                              <a href="{{ path('admin.category.list') }}" class="btn btn-default navbar-btn">{{ 'admin_panel'|trans }}</a>
+                          </div>
+                      </li>
+                  {% endif %}
+  
+                  <li>
+                      <div>
+                          <a href="{{ path('affiliate.create') }}" class="btn btn-default navbar-btn">{{ 'affiliates'|trans }}</a>
+                      </div>
+                  </li>
+  
+                  <li>
+                      <div>
+                          <a href="{{ path('job.create') }}" class="btn btn-default navbar-btn">{{ 'job.base.create'|trans }}</a>
+                      </div>
+                  </li>
+  
++                 <li class="dropdown">
++                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ app.request.locale|upper }}<span class="caret"></span></a>
++                     <ul class="dropdown-menu">
++                         {% for locale in locales %}
++                             <li>
++                                 <a href="{{ path(app.request.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': locale})) }}">{{ locale|upper }}</a>
++                             </li>
++                         {% endfor %}
++                     </ul>
++                 </li>
+  
+                  {% if app.user %}
+                      <li><a href="{{ path('fos_user_security_logout') }}">{{ 'logout'|trans }}</a></li>
+                  {% endif %}
+              </ul>
+          </div>
+      </div>
+  </nav>
+  
+  <div class="container">
+      {% block body %}{% endblock %}
+  </div>
+  </body>
+  </html>
+```
 
 ## Internationalization
 
@@ -106,3 +315,6 @@ Main page is available here: [Symfony 4.1 Jobeet Tutorial](../index.md)
 [3]: https://en.wikipedia.org/wiki/Internationalization
 [4]: https://packagist.org/packages/symfony/translation
 [5]: http://127.0.0.1/ru/
+[6]: https://getbootstrap.com/docs/3.3/javascript/#dropdowns
+[7]: https://nodejs.org
+[8]: https://jquery.com/
