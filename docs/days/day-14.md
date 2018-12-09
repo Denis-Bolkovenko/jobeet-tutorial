@@ -280,15 +280,106 @@ Now selector works and language is mentioned in URL.
 
 ## Internationalization
 
+### Templates
+
+An internationalized website means that the user interface is translated into several languages.
+
+In a template, all strings that are language dependent must be passed through `trans` filter.
+
+Here is how to use it for the Jobeet layout:
+
+```diff
+  <!DOCTYPE html>
+  <html>
+  <head>
+-     <title>{% block title %}Jobeet - Your best job board{% endblock %}</title>
++     <title>{% block title %}{{ 'title'|trans }}{% endblock %}</title>
+  
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  
+      {% block stylesheets %}{% endblock %}
+  
+      <script src="{{ asset('build/js/app.js') }}"></script>
+      {% block javascripts %}{% endblock %}
+  
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  </head>
+  <body>
+  <nav class="navbar navbar-default">
+      <div class="container-fluid">
+          <div class="navbar-header">
+-             <a class="navbar-brand" href="{{ path('job.list') }}">Jobeet</a>
++             <a class="navbar-brand" href="{{ path('job.list') }}">{{ 'navbar_label'|trans }}</a>
+          </div>
+  
+          <div class="collapse navbar-collapse">
+              <ul class="nav navbar-nav navbar-right">
+                  {% if is_granted('ROLE_ADMIN') %}
+                      <li>
+                          <div>
+-                             <a href="{{ path('admin.category.list') }}" class="btn btn-default navbar-btn">Admin Panel</a>
++                             <a href="{{ path('admin.category.list') }}" class="btn btn-default navbar-btn">{{ 'admin_panel'|trans }}</a>
+                          </div>
+                      </li>
+                  {% endif %}
+  
+                  <li>
+                      <div>
+-                         <a href="{{ path('affiliate.create') }}" class="btn btn-default navbar-btn">Affiliates</a>
++                         <a href="{{ path('affiliate.create') }}" class="btn btn-default navbar-btn">{{ 'affiliates'|trans }}</a>
+                      </div>
+                  </li>
+  
+                  <li>
+                      <div>
+-                         <a href="{{ path('job.create') }}" class="btn btn-default navbar-btn">Post a Job</a>
++                         <a href="{{ path('job.create') }}" class="btn btn-default navbar-btn">{{ 'job.create'|trans }}</a>
+                      </div>
+                  </li>
+  
+                  <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ app.request.locale|upper }}<span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                          {% for locale in locales %}
+                              <li>
+                                  <a href="{{ path(app.request.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': locale})) }}">{{ locale|upper }}</a>
+                              </li>
+                          {% endfor %}
+                      </ul>
+                  </li>
+  
+                  {% if app.user %}
+-                     <li><a href="{{ path('fos_user_security_logout') }}">Logout</a></li>
++                     <li><a href="{{ path('fos_user_security_logout') }}">{{ 'logout'|trans }}</a></li>
+                  {% endif %}
+              </ul>
+          </div>
+      </div>
+  </nav>
+  
+  <div class="container">
+      {% block body %}{% endblock %}
+  </div>
+  </body>
+  </html>
+```
+
+When Symfony renders a template, each time the `trans` filter is called, Symfony looks for a translation for the current request locale.
+If a translation is found, it is used, if not, the initial value is returned as a fallback value.
+
+All translations are stored in `translations` folder.
+The translations package provides a lot of different strategies to store the translations.
+We will use the "XLIFF" format, which is a standard and the most flexible one.
+
+> Other strategies are gettext, yaml, json, etc.
+
+### translation:update
+
 ...
 
 ```yaml
 bin/console translation:update --dump-messages --output-format xlf --force en
 ```
-
-### Templates
-
-...
 
 ### Translations with Arguments
 
