@@ -159,7 +159,8 @@ $(document).ready(function() {
 });
 ```
 
-`webpack.config.js`
+Symfony provides us a file with initial webpack configuration - `webpack.config.js`.
+Register out new `app.js` file as entry point and activate jQuery:
 
 ```diff
   var Encore = require('@symfony/webpack-encore');
@@ -274,6 +275,8 @@ Include this file in base layout (`templates/base.html.twig`) and add dropdown t
   </body>
   </html>
 ```
+
+Now selector works and language is mentioned in URL.
 
 ## Internationalization
 
