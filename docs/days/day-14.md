@@ -28,7 +28,7 @@ We can start with that configuration without any changes.
 
 ## Locale in the URL
 
-The Jobeet website will be available in English and Russian.
+The Jobeet site will be available in English and Russian.
 As an URL can only represent a single resource, the culture must be embedded in the URL.
 In order to do that, open the `config/routes/annotations.yaml` file, and add `prefix` for all routes (except API).
 
@@ -97,10 +97,10 @@ And define as global twig variable in `config/packages/twig.yaml`:
 
 Later we will use this variable to render selector.
 
-Till now we connected only css file from bootstrap library using CDN, but now we need JS file too which requires [jQuery][8].
-Let’s see how to connect css/js libraries in Symfony way!
+Till now we connected only CSS file from bootstrap library using CDN, but now we need JS file too which requires [jQuery][8].
+Let’s see how to connect CSS/JS libraries in Symfony way!
 
-Add [NodeJS][7] container in `docker-compose.yml` file:
+Add [Node.js][7] container in `docker-compose.yml` file:
 
 ```yaml
 version: "3.1"
@@ -115,15 +115,15 @@ services:
         - .:/application
 ```
 
-This container has **node** and **npm** inside. NPM is a package manager for JavaScript (like Composer for PHP).
+This container has **node** and **npm** inside. Npm is a package manager for JavaScript (like Composer for PHP).
 
-Build and run node container:
+Build and run Node.js container:
 
 ```bash
 docker-compose up -d
 ```
 
-Enter in node container:
+Enter in Node.js container:
 
 ```bash
 docker-compose run node bash
@@ -196,7 +196,7 @@ Register out new `app.js` file as entry point and activate jQuery:
   module.exports = Encore.getWebpackConfig();
 ```
 
-Build assets with next command in node container:
+Build assets with next command in Node.js container:
 
 ```bash
 npm run dev
@@ -282,7 +282,7 @@ Now selector works and language is mentioned in URL.
 
 ### Templates
 
-An internationalized website means that the user interface is translated into several languages.
+An internationalized site means that the user interface is translated into several languages.
 
 In a template, all strings that are language dependent must be passed through `trans` filter.
 
@@ -375,11 +375,34 @@ We will use the "XLIFF" format, which is a standard and the most flexible one.
 
 ### translation:update
 
-...
+Instead of creating the translation file by hand, use the built-in `translation:update` command:
 
-```yaml
-bin/console translation:update --dump-messages --output-format xlf --force en
+```bash
+bin/console translation:update --output-format xlf --force en
 ```
+
+The `translation:update` command finds all strings that need to be translated in en in templates and creates or updates the corresponding translation files.
+The `--force` option saves the new strings in the translation files.
+You can also use the `--clean` option to automatically remove strings that do not exist anymore.
+
+In our case, it populates the file we have created:
+
+```xml
+
+```
+
+Each translation is managed by a `trans-unit` tag which has a unique `id` attribute.
+You can now edit this file and add translations for the English language:
+
+```xml
+
+```
+
+> As XLIFF is a standard format, a lot of tools exist to ease the translation process.
+> You can use this [Free Online XLIFF Editor][9] to manage translations.
+
+> As XLIFF is a file-based format, the same precedence and merging rules that exist for other Symfony configuration files are also applicable.
+> Translations files can exist in a project or a bundle, and the most specific file overrides translations found in the more global ones.
 
 ### Translations with Arguments
 
@@ -388,7 +411,7 @@ bin/console translation:update --dump-messages --output-format xlf --force en
 ## Final Thoughts
 
 Internationalization and localization are first-class citizens in Symfony.
-Providing a localized website to your users is very easy as symfony provides all the basic tools and even gives you command line tasks to make it fast.
+Providing a localized site to your users is very easy as symfony provides all the basic tools and even gives you command-line tasks to make it fast.
 
 That’s all for today, you can find the code here: [https://github.com/gregurco/jobeet/tree/day14][1]
 
@@ -412,3 +435,4 @@ Main page is available here: [Symfony 4.1 Jobeet Tutorial](../index.md)
 [6]: https://getbootstrap.com/docs/3.3/javascript/#dropdowns
 [7]: https://nodejs.org
 [8]: https://jquery.com/
+[9]: http://xliff.brightec.co.uk/
