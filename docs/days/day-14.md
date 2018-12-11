@@ -115,7 +115,8 @@ services:
         - .:/application
 ```
 
-This container has **node** and **npm** inside. Npm is a package manager for JavaScript (like Composer for PHP).
+This container has **Node.JS** and **npm** inside.
+Npm is a package manager for JavaScript (like Composer for PHP).
 
 Build and run Node.js container:
 
@@ -388,14 +389,80 @@ You can also use the `--clean` option to automatically remove strings that do no
 In our case, it populates the file we have created:
 
 ```xml
-
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+    <header>
+      <tool tool-id="symfony" tool-name="Symfony"/>
+    </header>
+    <body>
+      <trans-unit id="YM.OFL6" resname="navbar_label">
+        <source>navbar_label</source>
+        <target>__navbar_label</target>
+      </trans-unit>
+      <trans-unit id="4iIkq4Y" resname="admin_panel">
+        <source>admin_panel</source>
+        <target>__admin_panel</target>
+      </trans-unit>
+      <trans-unit id="Frdv8uy" resname="affiliates">
+        <source>affiliates</source>
+        <target>__affiliates</target>
+      </trans-unit>
+      <trans-unit id="Fipexar" resname="job.create">
+        <source>job.create</source>
+        <target>__job.create</target>
+      </trans-unit>
+      <trans-unit id="ACcM9j_" resname="logout">
+        <source>logout</source>
+        <target>__logout</target>
+      </trans-unit>
+      <trans-unit id="qvIyBkY" resname="title">
+        <source>title</source>
+        <target>__title</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
 ```
 
 Each translation is managed by a `trans-unit` tag which has a unique `id` attribute.
 You can now edit this file and add translations for the English language:
 
 ```xml
-
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+    <header>
+      <tool tool-id="symfony" tool-name="Symfony"/>
+    </header>
+    <body>
+      <trans-unit id="YM.OFL6" resname="navbar_label">
+        <source>navbar_label</source>
+        <target>Jobeet</target>
+      </trans-unit>
+      <trans-unit id="4iIkq4Y" resname="admin_panel">
+        <source>admin_panel</source>
+        <target>Admin panel</target>
+      </trans-unit>
+      <trans-unit id="Frdv8uy" resname="affiliates">
+        <source>affiliates</source>
+        <target>Affiliates</target>
+      </trans-unit>
+      <trans-unit id="Fipexar" resname="job.create">
+        <source>job.create</source>
+        <target>Post a Job</target>
+      </trans-unit>
+      <trans-unit id="ACcM9j_" resname="logout">
+        <source>logout</source>
+        <target>Logout</target>
+      </trans-unit>
+      <trans-unit id="SPM6JVE" resname="title">
+        <source>title</source>
+        <target>Jobeet - Your best job board</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
 ```
 
 > As XLIFF is a standard format, a lot of tools exist to ease the translation process.
